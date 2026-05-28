@@ -1,0 +1,362 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>코디 미리보기</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Pretendard',sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#ffdde1,#ee9ca7);
+    padding:30px;
+}
+
+.container{
+    width:420px;
+    background:rgba(255,255,255,0.2);
+    backdrop-filter:blur(15px);
+    border:1px solid rgba(255,255,255,0.3);
+    border-radius:30px;
+    padding:30px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:30px;
+    color:white;
+    font-size:32px;
+}
+
+.upload-box{
+    margin-bottom:20px;
+}
+
+.upload-box label{
+    display:block;
+    margin-bottom:10px;
+    color:white;
+    font-weight:bold;
+    font-size:15px;
+}
+
+input[type="file"]{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:15px;
+    background:white;
+    cursor:pointer;
+}
+
+.preview{
+    width:320px;
+    height:500px;
+    margin:30px auto;
+    border-radius:25px;
+    overflow:hidden;
+    position:relative;
+    background:white;
+    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+}
+
+.preview img{
+    position:absolute;
+    left:0;
+    width:100%;
+    object-fit:contain;
+    background:#fafafa;
+}
+
+.top{
+    top:0;
+    height:50%;
+}
+
+.bottom{
+    bottom:0;
+    height:50%;
+}
+
+.arrow{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    width:40px;
+    height:40px;
+    border:none;
+    border-radius:50%;
+    background:rgba(255,255,255,0.8);
+    font-size:24px;
+    cursor:pointer;
+    z-index:10;
+    box-shadow:0 4px 10px rgba(0,0,0,0.2);
+}
+
+.arrow:hover{
+    background:white;
+}
+
+.left{
+    left:10px;
+}
+
+.right{
+    right:10px;
+}
+
+.top-controls{
+    position:absolute;
+    top:25%;
+    width:100%;
+}
+
+.bottom-controls{
+    position:absolute;
+    top:75%;
+    width:100%;
+}
+
+button.save-btn{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:20px;
+    background:linear-gradient(135deg,#ff758c,#ff7eb3);
+    color:white;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:20px;
+}
+
+.footer{
+    text-align:center;
+    margin-top:20px;
+    color:white;
+    font-size:13px;
+    opacity:0.8;
+}
+
+.info{
+    text-align:center;
+    color:white;
+    margin-top:10px;
+    font-size:14px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>👕 코디 미리보기</h1>
+
+<div class="upload-box">
+    <label>상의 사진 여러 개 업로드</label>
+    <input type="file" id="topInput" accept="image/*" multiple>
+</div>
+
+<div class="upload-box">
+    <label>하의 사진 여러 개 업로드</label>
+    <input type="file" id="bottomInput" accept="image/*" multiple>
+</div>
+
+<div class="preview">
+
+    <img id="topImg" class="top">
+    <img id="bottomImg" class="bottom">
+
+    <!-- 상의 화살표 -->
+    <div class="top-controls">
+        <button class="arrow left" onclick="prevTop()">❮</button>
+        <button class="arrow right" onclick="nextTop()">❯</button>
+    </div>
+
+    <!-- 하의 화살표 -->
+    <div class="bottom-controls">
+        <button class="arrow left" onclick="prevBottom()">❮</button>
+        <button class="arrow right" onclick="nextBottom()">❯</button>
+    </div>
+
+</div>
+
+<div class="info">
+    상의 / 하의를 화살표로 변경할 수 있습니다
+</div>
+
+<button class="save-btn" onclick="download()">
+    📸 코디 이미지 저장
+</button>
+
+<div class="footer">
+    오늘의 패션을 미리 확인해보세요 ✨
+</div>
+
+</div>
+
+<script>
+
+const topInput = document.getElementById("topInput")
+const bottomInput = document.getElementById("bottomInput")
+
+let topImages = []
+let bottomImages = []
+
+let topIndex = 0
+let bottomIndex = 0
+
+// 상의 업로드
+topInput.addEventListener("change", function(){
+
+    topImages = []
+    topIndex = 0
+
+    const files = Array.from(this.files)
+
+    files.forEach(file => {
+
+        const reader = new FileReader()
+
+        reader.onload = function(e){
+
+            topImages.push(e.target.result)
+
+            // 첫 번째 이미지 표시
+            if(topImages.length === 1){
+                document.getElementById("topImg").src = topImages[0]
+            }
+        }
+
+        reader.readAsDataURL(file)
+    })
+})
+
+
+// 하의 업로드
+bottomInput.addEventListener("change", function(){
+
+    bottomImages = []
+    bottomIndex = 0
+
+    const files = Array.from(this.files)
+
+    files.forEach(file => {
+
+        const reader = new FileReader()
+
+        reader.onload = function(e){
+
+            bottomImages.push(e.target.result)
+
+            // 첫 번째 이미지 표시
+            if(bottomImages.length === 1){
+                document.getElementById("bottomImg").src = bottomImages[0]
+            }
+        }
+
+        reader.readAsDataURL(file)
+    })
+})
+// 상의 이전
+function prevTop(){
+
+    if(topImages.length === 0) return
+
+    topIndex--
+
+    if(topIndex < 0){
+        topIndex = topImages.length - 1
+    }
+
+    document.getElementById("topImg").src = topImages[topIndex]
+}
+
+// 상의 다음
+function nextTop(){
+
+    if(topImages.length === 0) return
+
+    topIndex++
+
+    if(topIndex >= topImages.length){
+        topIndex = 0
+    }
+
+    document.getElementById("topImg").src = topImages[topIndex]
+}
+
+// 하의 이전
+function prevBottom(){
+
+    if(bottomImages.length === 0) return
+
+    bottomIndex--
+
+    if(bottomIndex < 0){
+        bottomIndex = bottomImages.length - 1
+    }
+
+    document.getElementById("bottomImg").src = bottomImages[bottomIndex]
+}
+
+// 하의 다음
+function nextBottom(){
+
+    if(bottomImages.length === 0) return
+
+    bottomIndex++
+
+    if(bottomIndex >= bottomImages.length){
+        bottomIndex = 0
+    }
+
+    document.getElementById("bottomImg").src = bottomImages[bottomIndex]
+}
+
+// 저장 기능
+function download(){
+
+    const canvas = document.createElement("canvas")
+
+    canvas.width = 320
+    canvas.height = 500
+
+    const ctx = canvas.getContext("2d")
+
+    const topImg = document.getElementById("topImg")
+    const bottomImg = document.getElementById("bottomImg")
+
+    ctx.fillStyle = "white"
+    ctx.fillRect(0,0,320,500)
+
+    ctx.drawImage(topImg,0,0,320,250)
+    ctx.drawImage(bottomImg,0,250,320,250)
+
+    const link = document.createElement("a")
+
+    link.download = "outfit.png"
+    link.href = canvas.toDataURL("image/png")
+
+    link.click()
+}
+
+</script>
+
+</body>
+</html>
